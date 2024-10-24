@@ -60,7 +60,7 @@ const Home = () => {
   useEffect(() => {
     const fetchTreatmentStageRanges = async () => {
       try {
-        const response = await axios.get("/treatment-stages"); // Replace with your API endpoint
+        const response = await axios.get("https://rilcet.onrender.com/treatment-stages"); // Replace with your API endpoint
         setTreatmentStageRanges(response.data); // Assuming response data is in the correct format
       } catch (error) {
         toast.error("Failed to fetch treatment stage ranges.");
