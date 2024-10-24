@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import Dropdown from "../components/Home/DropDown";
-import InputField from "../components/Home/Inputfield";
+import InputField from "../components/Home/InputField";
 import Button1 from "../components/Home/Button1";
 import ResultDisplay from "../components/Home/EvaluationResult";
 import RefreshButton from "../components/Home/RefreshButton";
@@ -60,7 +60,7 @@ const Home = () => {
   useEffect(() => {
     const fetchTreatmentStageRanges = async () => {
       try {
-        const response = await axios.get("https://rilcet.onrender.com/treatment-stages"); // Replace with your API endpoint
+        const response = await axios.get("/treatment-stages"); // Replace with your API endpoint
         setTreatmentStageRanges(response.data); // Assuming response data is in the correct format
       } catch (error) {
         toast.error("Failed to fetch treatment stage ranges.");
@@ -148,12 +148,12 @@ const Home = () => {
 
       // Make the API request to save the data
       try {
-        const response = await axios.post('https://rilcet.onrender.com/evaluation', evaluationData);
+        const response = await axios.post('/evaluation', evaluationData);
         if(response.status === 200) {
           console.log("Data saved success");
         }
       } catch (error) {
-        console.log("Error saving data : ", error);
+        console.log("Error saving data: ", error.response ? error.response.data : error.message);
       }
     }
   };
