@@ -39,7 +39,7 @@ const Dropdown = ({ onSelectStage }) => {
   useEffect(() => {
     const fetchTreatmentStages = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/treatment-stages');
+        const response = await axios.get('https://rilcet.onrender.com/treatment-stages');
         setTreatmentStages(response.data);
       } catch (error) {
         setError('Error fetching treatment stages.');
