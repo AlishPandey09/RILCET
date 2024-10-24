@@ -7,12 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/treatment-stages': {
-        target: 'http://localhost:5000', // Backend server URL
+        target: 'https://rilcet.onrender.com', // Backend server URL
         changeOrigin: true, // Needed for virtual hosted sites
         secure: false, // If using HTTPS, set this to true
       },
       '/evaluation': {
-        target: 'http://localhost:5000', // Backend server URL
+        target: 'https://rilcet.onrender.com', // Backend server URL
         changeOrigin: true, // Needed for virtual hosted sites
         secure: false, // If using HTTPS, set this to true
       },
