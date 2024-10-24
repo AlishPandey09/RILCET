@@ -15,7 +15,7 @@ const saveEvaluationResult = async (req, res) => {
         });
 
         await newEvaluation.save();
-        res.status(20).json({ message: 'Evaluation result saved successfully', evaluation: newEvaluation });
+        res.status(201).json({ message: 'Evaluation result saved successfully', evaluation: newEvaluation });
     } catch (error) {
         res.status(500).json({ message: 'Error saving evaluation result', error });
     }
