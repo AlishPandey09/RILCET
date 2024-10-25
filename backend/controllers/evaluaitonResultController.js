@@ -21,4 +21,13 @@ const saveEvaluationResult = async (req, res) => {
     }
 };
 
-module.exports = { saveEvaluationResult };
+const getEvaluationResult = async (req, res) => {
+    try {
+        const results = await EvaluationResult.find();
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ message : error.message });
+    }
+};
+
+module.exports = { saveEvaluationResult, getEvaluationResult };

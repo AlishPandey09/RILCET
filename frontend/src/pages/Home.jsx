@@ -287,7 +287,7 @@ const Home = () => {
           {result && <ResultDisplay result={result} />}
         </div>
 
-        <button onClick={handleAdminLoginClick}>Management</button>
+        <button onClick={handleAdminLoginClick} className="text-sixthColor text-lg font-thin hover:text-tertiaryColor hover:font-normal underline">Management</button>
       </div>
     </div>
   );
