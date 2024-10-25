@@ -26,7 +26,7 @@ const ManageData = () => {
 
     if (treatmentStage) {
       try {
-        const response = await axios.get(`http://localhost:5000/treatment-stages/${treatmentStage}`);
+        const response = await axios.get(`https://rilcet.onrender.com/treatment-stages/${treatmentStage}`);
         // Ensure that response.data has a 'ranges' property
         setStageData({ ...response.data, ranges: response.data.ranges || {} });
       } catch (error) {
@@ -64,7 +64,7 @@ const ManageData = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:5000/treatment-stages/${selectedStage}`, stageData);
+      await axios.put(`https://rilcet.onrender.com/treatment-stages/${selectedStage}`, stageData);
       toast.success("Treatment stage updated successfully!");
       setIsConfirming(false);
       setStageData({ ranges: {} });
