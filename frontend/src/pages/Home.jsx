@@ -60,7 +60,9 @@ const Home = () => {
   useEffect(() => {
     const fetchTreatmentStageRanges = async () => {
       try {
-        const response = await axios.get("https://rilcet.onrender.com/treatment-stages"); // Replace with your API endpoint
+        const response = await axios.get(
+          "https://rilcet.onrender.com/treatment-stages"
+        ); // Replace with your API endpoint
         setTreatmentStageRanges(response.data); // Assuming response data is in the correct format
       } catch (error) {
         toast.error("Failed to fetch treatment stage ranges.");
@@ -88,53 +90,81 @@ const Home = () => {
 
     // Validate LAB values
     if (
-      isNaN(lValueNum) || isNaN(aValueNum) || isNaN(bValueNum) ||
-      lValueNum < 0 || lValueNum > 100 ||
-      aValueNum < -128 || aValueNum > 127 ||
-      bValueNum < -128 || bValueNum > 127
+      isNaN(lValueNum) ||
+      isNaN(aValueNum) ||
+      isNaN(bValueNum) ||
+      lValueNum < 0 ||
+      lValueNum > 100 ||
+      aValueNum < -128 ||
+      aValueNum > 127 ||
+      bValueNum < -128 ||
+      bValueNum > 127
     ) {
-      toast.warn("Warning: The LAB values are outside the valid range! Please re-enter the values.");
+      toast.warn(
+        "Warning: The LAB values are outside the valid range! Please re-enter the values."
+      );
       return;
     } else {
-
-      // Logic for range calc
+      // Logic for range calculation
       let tolerance95 = 0;
       let tolerance99 = 0;
 
       // Check L value in 95% and 99%
-      if(lValueNum >= searchStage.ranges["95%"].L[0] && lValueNum <= searchStage.ranges["95%"].L[1]) {
+      if (
+        lValueNum >= searchStage.ranges["95%"].L[0] &&
+        lValueNum <= searchStage.ranges["95%"].L[1]
+      ) {
         tolerance95++;
       }
-      if (lValueNum >= searchStage.ranges["99%"].L[0] && lValueNum <= searchStage.ranges["99%"].L[1]) {
+      if (
+        lValueNum >= searchStage.ranges["99%"].L[0] &&
+        lValueNum <= searchStage.ranges["99%"].L[1]
+      ) {
         tolerance99++;
       }
 
       // Check A value in 95% and 99%
-      if (aValueNum >= searchStage.ranges["95%"].A[0] && aValueNum <= searchStage.ranges["95%"].A[1]) {
+      if (
+        aValueNum >= searchStage.ranges["95%"].A[0] &&
+        aValueNum <= searchStage.ranges["95%"].A[1]
+      ) {
         tolerance95++;
       }
-      if (aValueNum >= searchStage.ranges["99%"].A[0] && aValueNum <= searchStage.ranges["99%"].A[1]) {
+      if (
+        aValueNum >= searchStage.ranges["99%"].A[0] &&
+        aValueNum <= searchStage.ranges["99%"].A[1]
+      ) {
         tolerance99++;
       }
 
       // Check B value in 95% and 99%
-      if (bValueNum >= searchStage.ranges["95%"].B[0] && bValueNum <= searchStage.ranges["95%"].B[1]) {
+      if (
+        bValueNum >= searchStage.ranges["95%"].B[0] &&
+        bValueNum <= searchStage.ranges["95%"].B[1]
+      ) {
         tolerance95++;
       }
-      if (bValueNum >= searchStage.ranges["99%"].B[0] && bValueNum <= searchStage.ranges["99%"].B[1]) {
+      if (
+        bValueNum >= searchStage.ranges["99%"].B[0] &&
+        bValueNum <= searchStage.ranges["99%"].B[1]
+      ) {
         tolerance99++;
       }
 
       // Step 4: Evaluate the result based on the matches
+      let evaluationResult;
       if (tolerance95 === 3 && tolerance99 === 3) {
-        setResult('normal');
+        evaluationResult = "normal";
       } else if (tolerance95 >= 2 && tolerance99 < 3) {
-        setResult('normal');
+        evaluationResult = "normal";
       } else if (tolerance99 >= 2 && tolerance95 < 3) {
-        setResult('borderline')
+        evaluationResult = "borderline";
       } else {
-        setResult("outOfRange");
+        evaluationResult = "outOfRange";
       }
+
+      // Set the result state based on the calculated result
+      setResult(evaluationResult);
 
       // Preparing the data to be sent to the database
       const evaluationData = {
@@ -142,22 +172,27 @@ const Home = () => {
         L: lValueNum,
         A: aValueNum,
         B: bValueNum,
-        result: result,
-        time: currentTime
+        result: evaluationResult, // Use the local variable here
+        time: currentTime,
       };
 
       // Make the API request to save the data
       try {
-        const response = await axios.post('/evaluation', evaluationData);
-        if(response.status === 200) {
-          console.log("Data saved success");
+        const response = await axios.post(
+          "https://rilcet.onrender.com/evaluation",
+          evaluationData
+        );
+        if (response.status === 201) {
+          console.log("Data saved successfully");
         }
       } catch (error) {
-        console.log("Error saving data: ", error.response ? error.response.data : error.message);
+        console.log(
+          "Error saving data: ",
+          error.response ? error.response.data : error.message
+        );
       }
     }
   };
-
 
   return (
     <div className="relative w-full h-full bg-primaryColor overflow-hidden">
