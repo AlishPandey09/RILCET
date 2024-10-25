@@ -18,10 +18,8 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: undefined, // Optional, to control chunking behavior
-      },
+    build: {
+      outDir: 'dist', // Ensure the build outputs to the 'dist' folder
     },
   },
 });
