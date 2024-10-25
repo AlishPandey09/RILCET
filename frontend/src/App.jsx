@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -10,7 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute"; // Adjust the import p
 
 function App() {
     return (
-        <Router>
+        <>
             <Routes>
                 {/* Route to Home component */}
                 <Route path="/" element={<Home />} />
@@ -39,7 +39,7 @@ function App() {
                 pauseOnHover
                 theme="colored"
             />
-        </Router>
+        </>
     );
 }
 
