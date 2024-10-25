@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import emailjs from 'emailjs-com';
 import CryptoJS from 'crypto-js';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const AdminLogin = () => {
@@ -67,38 +67,30 @@ const AdminLogin = () => {
     // Handle sending OTP via EmailJS
     const handleSendOtp = async () => {
         if (!allowedEmails.includes(email)) {
-            toast.error('Please enter the email which has permission to access the admin panel.', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'colored',
-            });
+            toast.error('Please enter the email which has permission to access the admin panel.');
             return;
         }
 
         const otp = generateOtp();
         const encryptedOtp = CryptoJS.AES.encrypt(otp, import.meta.env.VITE_SECRET_KEY).toString();
 
+        // Reassign templateParams to ensure it updates with the latest email
         const templateParams = {
             to_email: email,
-            otp_code: otp, // Send the plain OTP to the user's email
+            otp_code: otp, // Plain OTP to email
         };
 
         try {
-            const response = await emailjs.send(
+            await emailjs.send(
                 import.meta.env.VITE_EMAILJS_SERVICE_ID,
                 import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
                 templateParams,
                 import.meta.env.VITE_EMAILJS_USER_ID
             );
             setShowOtpInput(true);
-            setOtpSent(true); // Track that OTP has been sent
-            setResendAvailable(false); // Disable resend button initially
-            startTimer(); // Start the timer for the resend button
+            setOtpSent(true);
+            setResendAvailable(false);
+            startTimer();
         } catch (error) {
             alert('Failed to send OTP. Please try again.');
         }
@@ -225,6 +217,7 @@ const AdminLogin = () => {
                     )}
                 </div>
             </div>
+            <Link to="/" className="text-sixthColor text-lg font-thin hover:text-tertiaryColor hover:font-normal underline mt-16">Return to Home</Link>
         </div>
     );
 };

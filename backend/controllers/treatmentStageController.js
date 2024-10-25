@@ -5,17 +5,54 @@ const getTreatmentStages = async (req, res) => {
   try {
     const stages = await TreatmentStage.find();
     res.json(stages);
-    // res.status(200).json({ message: "Fetching success." });
   } catch (error) {
     console.error('Error fetching treatment stages:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const checkValueRange = async (req, res) => {
-  const { treatmentStage, L, A, B } = req.body; // Expecting treatmentStage, L, A, B from the request body
+// Get a specific treatment stage by name
+const getTreatmentStageByName = async (req, res) => {
+  const { name } = req.params;
   try {
-    const stage = await TreatmentStage.findOne({ treatmentStage: treatmentStage }); // Ensure this matches your MongoDB schema
+    const stage = await TreatmentStage.findOne({ treatmentStage: name }); // Use treatmentStage instead of name
+    if (!stage) {
+      return res.status(404).json({ message: 'Treatment stage not found' });
+    }
+    res.json(stage);
+  } catch (error) {
+    console.error('Error fetching treatment stage:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Update a treatment stage
+const updateTreatmentStage = async (req, res) => {
+  const { name } = req.params; // name refers to treatmentStage
+  const updateData = req.body;
+
+  try {
+    const updatedStage = await TreatmentStage.findOneAndUpdate(
+      { treatmentStage: name },
+      updateData,
+      { new: true }
+    );
+    if (!updatedStage) {
+      return res.status(404).json({ message: 'Treatment stage not found' });
+    }
+    res.json(updatedStage);
+  } catch (error) {
+    console.error('Error updating treatment stage:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Check value range for treatment stage
+const checkValueRange = async (req, res) => {
+  const { treatmentStage, L, A, B } = req.body;
+
+  try {
+    const stage = await TreatmentStage.findOne({ treatmentStage: treatmentStage });
 
     if (!stage) {
       return res.status(404).json({ message: 'Treatment stage not found' });
@@ -48,8 +85,9 @@ const checkValueRange = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getTreatmentStages,
+  getTreatmentStageByName,
+  updateTreatmentStage,
   checkValueRange,
 };
