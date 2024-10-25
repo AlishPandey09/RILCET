@@ -60,7 +60,7 @@ const Home = () => {
   useEffect(() => {
     const fetchTreatmentStageRanges = async () => {
       try {
-        const response = await axios.get("/treatment-stages"); // Replace with your API endpoint
+        const response = await axios.get("https://rilcet.onrender.com/treatment-stages"); // Replace with your API endpoint
         setTreatmentStageRanges(response.data); // Assuming response data is in the correct format
       } catch (error) {
         toast.error("Failed to fetch treatment stage ranges.");
@@ -148,12 +148,12 @@ const Home = () => {
 
       // Make the API request to save the data
       try {
-        const response = await axios.post('http://localhost:5000/evaluation', evaluationData);
+        const response = await axios.post('/evaluation', evaluationData);
         if(response.status === 200) {
           console.log("Data saved success");
         }
       } catch (error) {
-        console.log("Error saving data : ", error);
+        console.log("Error saving data: ", error.response ? error.response.data : error.message);
       }
     }
   };
