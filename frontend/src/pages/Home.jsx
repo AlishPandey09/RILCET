@@ -8,6 +8,7 @@ import RefreshButton from "../components/Home/RefreshButton";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios"; // Ensure axios is installed
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [lValue, setLValue] = useState(""); // State for L value
@@ -194,6 +195,12 @@ const Home = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleAdminLoginClick = () => {
+    navigate("/admin-login"); // This triggers the client-side navigation
+  };
+
   return (
     <div className="relative w-full h-full bg-primaryColor overflow-hidden">
       {/* Random animated blurred morphing circles */}
@@ -216,6 +223,8 @@ const Home = () => {
           <h1 className="header font-semibold text-2xl text-center sm:text-nowrap sm:text-4xl mb-16">
             Lab Color Evaluation Tool
           </h1>
+
+          <button onClick={handleAdminLoginClick}>Go to Admin Login</button>
 
           {/* Treatment Stage */}
           <div className="treatment-stage">
