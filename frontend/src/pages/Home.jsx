@@ -148,7 +148,7 @@ const Home = () => {
 
       // Make the API request to save the data
       try {
-        const response = await axios.post('/evaluation', evaluationData);
+        const response = await axios.post('https://rilcet.onrender.com/evaluation', evaluationData);
         if(response.status === 200) {
           console.log("Data saved success");
         }
