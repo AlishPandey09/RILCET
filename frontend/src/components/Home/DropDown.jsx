@@ -53,15 +53,19 @@ const Dropdown = ({ onSelectStage }) => {
     <div className="relative mt-4 mx-auto text-tertiaryColor" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="flex items-center justify-between w-full px-6 py-4 text-left bg-secondaryColor rounded-lg border border-gray-300 shadow-md"
+        className="flex items-center justify-between w-full px-6 py-4 text-left bg-[#f04e44] rounded-lg shadow-md"
+        style={{
+          background:
+            "linear-gradient(-45deg, #B0499B, #6CCAD3)",
+        }}
       >
-        <span>{selectedOption || "Select an Option"}</span>
+        <span className='text-white'>{selectedOption || "Select Treatment Stage"}</span>
         <svg
           className={`w-4 h-4 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="currentColor"
+          stroke="white"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -74,7 +78,7 @@ const Dropdown = ({ onSelectStage }) => {
           transition={{ duration: 0.3 }}
           className="absolute z-10 w-full bg-white rounded-b-xl shadow-lg overflow-auto border border-gray-300"
         >
-          <li onClick={() => handleSelectChange('')} className="px-6 py-4 hover:bg-sixthColor cursor-pointer">
+          <li onClick={() => handleSelectChange('')} className="px-6 py-4 hover:bg-[#e7a1d9] cursor-pointer">
             Select an option
           </li>
           {error && (

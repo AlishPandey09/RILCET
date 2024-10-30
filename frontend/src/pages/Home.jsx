@@ -218,7 +218,7 @@ const Home = () => {
       ></div>
 
       {/* Foreground content */}
-      <div className="relative z-10 flex flex-col items-center justify-center font-lora text-tertiaryColor font-medium my-16 sm:my-24 mx-10 sm:mx-40">
+      <div className="relative z-10 flex flex-col items-center justify-center font-inter text-tertiaryColor font-medium my-16 sm:my-24 mx-10 sm:mx-40">
         <div className="LAB-Form border-2 rounded-[32px] p-8 sm:p-16 shadow-lg mb-16 sm:mb-24">
           <h1 className="header font-semibold text-2xl text-center sm:text-nowrap sm:text-4xl mb-16">
             Lab Color Evaluation Tool

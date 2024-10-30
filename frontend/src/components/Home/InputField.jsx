@@ -14,13 +14,13 @@ const InputField = ({ value, onChange, placeholder, ...props }) => {
   };
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 font-inter">
       <input
         type="number"
         value={inputValue}
         onChange={handleChange}
         placeholder={placeholder} // Set the customizable placeholder here
-        className="w-full px-6 py-4 border bg-secondaryColor border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-sixthColor placeholder:text-gray-400 placeholder:font-thin" // Customize placeholder color and size here
+        className="w-full px-5 py-3 border-2 bg-[#e9b9df] border-[#e7a1d9] rounded-lg focus:outline-none focus:ring-1 focus:ring-sixthColor placeholder:text-[#707070] placeholder:font-normal text-tertiaryColor placeholder:text-base" // Customize placeholder color and size here
         {...props}
       />
     </div>
