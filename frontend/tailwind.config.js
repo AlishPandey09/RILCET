@@ -13,9 +13,14 @@ export default {
         fourthColor: '#FF7B00FF',
         fifthColor: '#B613F1FF',
         sixthColor: '#DF90FCFF',
+        seventhColor: "#F04E44",
+        eighthColor: "#F68A60",
+        ninthColor: "#B0499B",
+        tenthColor: "#6CCAD3",
       },
       fontFamily: {
-        lora: ['"Lora"', 'serif']
+        lora: ['"Lora"', 'serif'],
+        inter: ['"Inter"', 'sans-serif']
       }
     },
   },

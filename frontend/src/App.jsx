@@ -7,13 +7,15 @@ import AdminPanel from "./pages/AdminPanel";
 import AdminLogin from "./pages/AdminLogin";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute"; // Adjust the import path as necessary
+import HomeUIUpdate from './pages/HomeUIUpdate';
 
 function App() {
     return (
         <>
             <Routes>
                 {/* Route to Home component */}
-                <Route path="/" element={<Home />} />
+                {/* <Route path="/" element={<Home />} /> */}
+                <Route path="/" element={<HomeUIUpdate />} />
 
                 {/* Route to Admin Side */}
                 <Route path="/admin-login" element={<AdminLogin />} />
