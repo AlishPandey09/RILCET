@@ -8,10 +8,10 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 // Importing Images
-import SMTooth from '../assets/images/sm-tooth.jpg'
-import ToothBG from '../assets/images/tooth-with-bg.jpg'
+import SMTooth from '../assets/images/sm-tooth.jpg';
+import ToothBG from '../assets/images/tooth-with-bg.jpg';
 
-import ComponentChecks from '../components/ComponentChecks'
+import ComponentChecks from '../components/ComponentChecks';
 
 const HomeUIUpdate = () => {
   const [lValue, setLValue] = useState(""); // State for L value
@@ -156,6 +156,15 @@ const HomeUIUpdate = () => {
         background: "linear-gradient(-45deg, #F04E44, #F68A60, #B0499B, #6CCAD3)",
       }}
     >
+      {/* Right Side Image Content for Smaller Screens */}
+      <div className="w-full lg:w-2/3 flex lg:hidden items-center justify-center bg-gray-100">
+        <img
+          src={SMTooth}
+          alt="Tooth Model"
+          className="object-cover h-24 w-full lg:h-full"
+        />
+      </div>
+
       {/* Management Button */}
       <div className="absolute text-center bottom-10">
         <button
@@ -166,7 +175,6 @@ const HomeUIUpdate = () => {
         </button>
       </div>
 
-      {/* Main Content */}
       <div className="w-full lg:w-[1200px] lg:flex bg-white shadow-lg overflow-hidden">
         {/* Left Side Form Content */}
         <div className="p-8 xl:p-12 w-full lg:w-2/5 flex flex-col justify-between">
