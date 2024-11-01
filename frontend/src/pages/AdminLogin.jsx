@@ -217,7 +217,7 @@ const AdminLogin = () => {
                     )}
                 </div>
             </div>
-            <Link to="/" className="text-sixthColor text-lg font-thin hover:text-tertiaryColor hover:font-normal underline mt-16">Return to Home</Link>
+            <Link to="/" className="text-[#9c9c9c] text-lg font-light hover:text-tertiaryColor hover:font-normal mt-16">Return to Home</Link>
         </div>
     );
 };

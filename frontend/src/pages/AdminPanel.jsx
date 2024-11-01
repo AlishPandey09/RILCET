@@ -25,9 +25,9 @@ const AdminPanel = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-primaryColor">
+        <div className="flex flex-col min-h-screen bg-primaryColor">
             {/* Header Component */}
-            <header className="w-full py-8 shadow-gray-400 flex justify-between items-center px-12 md:px-24 lg;px-40">
+            <header className="w-full py-8 shadow-gray-400 flex justify-between items-center px-12 md:px-24 lg:px-40">
                 <h1 className="text-2xl text-tertiaryColor font-semibold">Admin Panel</h1>
 
                 <div className="flex items-center space-x-4">
