@@ -1,293 +1,279 @@
-import React, { useRef, useEffect, useState } from "react";
-import gsap from "gsap";
-import Dropdown from "../components/Home/DropDown";
-import InputField from "../components/Home/InputField";
-import Button1 from "../components/Home/Button1";
-import ResultDisplay from "../components/Home/EvaluationResult";
-import RefreshButton from "../components/Home/RefreshButton";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import axios from "axios"; // Ensure axios is installed
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Dropdown from "../components/Home/DropDown.jsx";
+import InputField from "../components/Home/InputField.jsx";
+import ResultDisplay from "../components/Home/EvaluationResult.jsx";
+import Button from "../components/Home/Button1.jsx";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { IoIosSettings } from "react-icons/io";
+
+// Importing Images
+import SMTooth from "../assets/images/sm-tooth.jpg";
+import ToothBG from "../assets/images/tooth-with-bg.jpg";
+import { treatmentGroups, treatmentStages } from "../constants/constant.js";
+import { evaluateLabValues } from "../api/evaluate.js";
 
 const Home = () => {
-  const [lValue, setLValue] = useState(""); // State for L value
-  const [aValue, setAValue] = useState(""); // State for a value
-  const [bValue, setBValue] = useState(""); // State for b value
-  const [result, setResult] = useState(null); // State for evaluation result
-  const [selectedStage, setSelectedStage] = useState(""); // State for selected treatment stage
-  const [treatmentStageRanges, setTreatmentStageRanges] = useState({}); // Store fetched ranges
+  const [lValue, setLValue] = useState("");
+  const [aValue, setAValue] = useState("");
+  const [bValue, setBValue] = useState("");
+  const [lSD, setLSD] = useState("");
+  const [aSD, setASD] = useState("");
+  const [bSD, setBSD] = useState("");
+  const [result, setResult] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedStage, setSelectedStage] = useState("");
 
-  const circle1 = useRef(null);
-  const circle2 = useRef(null);
-  const circle3 = useRef(null);
+  // useEffect(() => {
+  //   const fetchTreatmentStageRanges = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://rilcet.onrender.com/treatment-stages"
+  //       );
+  //       setTreatmentStageRanges(response.data);
+  //     } catch (error) {
+  //       toast.error("Failed to fetch treatment stage ranges.");
+  //     }
+  //   };
+  //   fetchTreatmentStageRanges();
+  // }, []);
 
-  // Animation for the background circles
-  useEffect(() => {
-    const tl = gsap.timeline({ repeat: -1, yoyo: true });
-    tl.to(circle1.current, {
-      duration: 6,
-      borderRadius: [
-        "40% 60% 60% 40% / 40% 60% 40% 60%",
-        "60% 40% 30% 70% / 70% 30% 60% 40%",
-        "50% 50% 50% 50% / 50% 50% 50% 50%",
-      ],
-      scale: [1, 1.2, 1.1],
-      ease: "easeInOut",
-    })
-      .to(circle2.current, {
-        duration: 7,
-        borderRadius: [
-          "40% 60% 60% 40% / 40% 60% 40% 60%",
-          "70% 30% 50% 50% / 30% 70% 50% 50%",
-          "50% 50% 50% 50% / 50% 50% 50% 50%",
-        ],
-        scale: [1, 1.15, 0.9],
-        ease: "easeInOut",
-      })
-      .to(circle3.current, {
-        duration: 5,
-        borderRadius: [
-          "30% 70% 50% 50% / 50% 50% 30% 70%",
-          "60% 40% 40% 60% / 60% 40% 40% 60%",
-          "50% 50% 50% 50% / 50% 50% 50% 50%",
-        ],
-        scale: [1, 1.1, 1.05],
-        ease: "easeInOut",
-      });
-  }, []);
-
-  // Fetch treatment stage ranges from the API
-  useEffect(() => {
-    const fetchTreatmentStageRanges = async () => {
-      try {
-        const response = await axios.get(
-          "https://rilcet.onrender.com/treatment-stages"
-        ); // Replace with your API endpoint
-        setTreatmentStageRanges(response.data); // Assuming response data is in the correct format
-      } catch (error) {
-        toast.error("Failed to fetch treatment stage ranges.");
-      }
-    };
-
-    fetchTreatmentStageRanges();
-  }, []);
-
-  // Handle the evaluate button click
   const handleEvaluateClick = async () => {
     const lValueNum = parseFloat(lValue);
     const aValueNum = parseFloat(aValue);
     const bValueNum = parseFloat(bValue);
-    const currentTime = new Date().toDateString();
+    const lSDNum = parseFloat(lSD);
+    const aSDNum = parseFloat(aSD);
+    const bSDNum = parseFloat(bSD);
 
-    const searchStage = treatmentStageRanges.find(
-      (stage) => stage.treatmentStage === selectedStage
-    );
-
-    if (!searchStage) {
-      toast.warn("Please select a valid treatment stage before evaluating.");
-      return; // Exit if no matching stage is found
+    // Validate dropdowns
+    if (!selectedGroup) {
+      toast.warn("Please select a treatment group.");
+      return;
     }
 
-    // Validate LAB values
+    if (!selectedStage) {
+      toast.warn("Please select a treatment stage.");
+      return;
+    }
+
+    // Validate LAB mean values
     if (
       isNaN(lValueNum) ||
-      isNaN(aValueNum) ||
-      isNaN(bValueNum) ||
       lValueNum < 0 ||
       lValueNum > 100 ||
+      isNaN(aValueNum) ||
       aValueNum < -128 ||
       aValueNum > 127 ||
+      isNaN(bValueNum) ||
       bValueNum < -128 ||
       bValueNum > 127
     ) {
-      toast.warn(
-        "Warning: The LAB values are outside the valid range! Please re-enter the values."
-      );
+      toast.warn("L* must be 0–100; a*, b* must be -128 to 127.");
       return;
-    } else {
-      // Logic for range calculation
-      let tolerance95 = 0;
-      let tolerance99 = 0;
-
-      // Check L value in 95% and 99%
-      if (
-        lValueNum >= searchStage.ranges["95%"].L[0] &&
-        lValueNum <= searchStage.ranges["95%"].L[1]
-      ) {
-        tolerance95++;
-      }
-      if (
-        lValueNum >= searchStage.ranges["99%"].L[0] &&
-        lValueNum <= searchStage.ranges["99%"].L[1]
-      ) {
-        tolerance99++;
-      }
-
-      // Check A value in 95% and 99%
-      if (
-        aValueNum >= searchStage.ranges["95%"].A[0] &&
-        aValueNum <= searchStage.ranges["95%"].A[1]
-      ) {
-        tolerance95++;
-      }
-      if (
-        aValueNum >= searchStage.ranges["99%"].A[0] &&
-        aValueNum <= searchStage.ranges["99%"].A[1]
-      ) {
-        tolerance99++;
-      }
-
-      // Check B value in 95% and 99%
-      if (
-        bValueNum >= searchStage.ranges["95%"].B[0] &&
-        bValueNum <= searchStage.ranges["95%"].B[1]
-      ) {
-        tolerance95++;
-      }
-      if (
-        bValueNum >= searchStage.ranges["99%"].B[0] &&
-        bValueNum <= searchStage.ranges["99%"].B[1]
-      ) {
-        tolerance99++;
-      }
-
-      // Step 4: Evaluate the result based on the matches
-      let evaluationResult;
-      if (tolerance95 === 3 && tolerance99 === 3) {
-        evaluationResult = "normal";
-      } else if (tolerance95 >= 2 && tolerance99 < 3) {
-        evaluationResult = "normal";
-      } else if (tolerance99 >= 2 && tolerance95 < 3) {
-        evaluationResult = "borderline";
-      } else {
-        evaluationResult = "outOfRange";
-      }
-
-      // Set the result state based on the calculated result
-      setResult(evaluationResult);
-
-      // Preparing the data to be sent to the database
-      const evaluationData = {
-        treatmentStage: selectedStage,
-        L: lValueNum,
-        A: aValueNum,
-        B: bValueNum,
-        result: evaluationResult, // Use the local variable here
-        time: currentTime,
-      };
-
-      // Make the API request to save the data
-      try {
-        const response = await axios.post(
-          "https://rilcet.onrender.com/evaluation",
-          evaluationData
-        );
-        if (response.status === 201) {
-          console.log("Data saved successfully");
-        }
-      } catch (error) {
-        console.log(
-          "Error saving data: ",
-          error.response ? error.response.data : error.message
-        );
-      }
     }
+
+    // Validate SDs (if provided)
+    if (
+      (lSD && (isNaN(lSDNum) || lSDNum < 0)) ||
+      (aSD && (isNaN(aSDNum) || aSDNum < 0)) ||
+      (bSD && (isNaN(bSDNum) || bSDNum < 0))
+    ) {
+      toast.error("Standard deviation values must be positive numbers.");
+      return;
+    }
+
+    // Reset any previous result
+    setResult(null);
+
+    // Prepare evaluation payload
+    const payload = {
+      treatmentGroup: selectedGroup,
+      treatmentStage: selectedStage,
+      userValues: {
+        L: { mean: lValueNum, sd: lSD ? lSDNum : null },
+        a: { mean: aValueNum, sd: aSD ? aSDNum : null },
+        b: { mean: bValueNum, sd: bSD ? bSDNum : null },
+      },
+    };
+
+    const data = await evaluateLabValues(payload);
+    if (data) setResult(data);
   };
 
-  const navigate = useNavigate();
+  const handleGroupChange = (group) => {
+    setSelectedGroup(group.label);
+  };
+
+  const handleStageChange = (group) => {
+    setSelectedStage(group.label);
+  };
 
   const handleAdminLoginClick = () => {
-    navigate("/admin-login"); // This triggers the client-side navigation
+    window.open("/admin-login", "_blank");
   };
 
   return (
-    <div className="relative w-full h-full bg-primaryColor overflow-hidden">
-      {/* Random animated blurred morphing circles */}
-      <div
-        ref={circle1}
-        className="absolute bg-red-700/30 blur-3xl w-80 h-80 -right-24 -top-24"
-      ></div>
-      <div
-        ref={circle2}
-        className="absolute bg-blue-700/30 blur-3xl w-80 h-80 top-1/3 -left-24"
-      ></div>
-      <div
-        ref={circle3}
-        className="absolute bg-orange-600/40 blur-3xl w-80 h-80 -bottom-24 -right-24"
-      ></div>
+    <div
+      className="relative w-full h-screen flex flex-col lg:flex-row justify-center items-center px-8 sm:px-24 md:px-48 lg:px-24 text-tertiaryColor"
+      style={{
+        background:
+          "linear-gradient(-45deg, #F04E44, #F68A60, #B0499B, #6CCAD3)",
+      }}
+    >
+      {/* <ComponentChecks /> */}
+      {/* Right Side Image Content for Smaller Screens */}
+      <div className="w-full lg:w-2/3 flex lg:hidden items-center justify-center bg-gray-100 relative">
+        <img
+          src={SMTooth}
+          alt="Tooth Model"
+          className="object-cover h-24 w-full"
+        />
+        <button
+          onClick={handleAdminLoginClick}
+          className="absolute right-4 top-2 text-xs sm:text-sm text-[#8a5641] hover:text-tertiaryColor"
+        >
+          <IoIosSettings className="h-6 w-6" />
+        </button>
+      </div>
 
-      {/* Foreground content */}
-      <div className="relative z-10 flex flex-col items-center justify-center font-inter text-tertiaryColor font-medium my-16 sm:my-24 mx-10 sm:mx-40">
-        <div className="LAB-Form border-2 rounded-[32px] p-8 sm:p-16 shadow-lg mb-16 sm:mb-24">
-          <h1 className="header font-semibold text-2xl text-center sm:text-nowrap sm:text-4xl mb-16">
-            Lab Color Evaluation Tool
+      <div className="w-full lg:w-[1200px] lg:flex bg-white shadow-lg max-w-[1024px] ">
+        <div className="p-4 md:p-6 xl:p-10 flex flex-col justify-between w-full lg:w-[60%] h-[550px] lg:h-[750px] md:h-[600px] sm:h-[550px] overflow-y-scroll">
+          <h1 className="text-md sm:text-lg md:text-xl lg:text-2xl font-semibold text-ninthColor hidden lg:block">
+            Lab Color Evaluation Tool For <span>Resin Infiltration</span>
           </h1>
 
-          {/* Treatment Stage */}
-          <div className="treatment-stage">
-            <h1 className="ts-header text-xl">Treatment Stage</h1>
-            <h2 className="ts-sub-header text-base font-light">
-              Please select the treatment stage from below options
+          <div className="mt-4">
+            <h2 className="text-sm md:text-base font-semibold">
+              Treatment Group
             </h2>
-            <Dropdown onSelectStage={setSelectedStage} />{" "}
-            {/* Pass setSelectedStage as a prop */}
+            <p className="text-xs md:text-sm text-gray-600">
+              Select Treatment Group for which you wish to evaluate L, a*, b*
+              values.*
+            </p>
+            <Dropdown
+              onSelect={handleGroupChange}
+              placeholder="Select Treatment Group"
+              fallbackOptions={treatmentGroups}
+              optionKey="label"
+              // fetchUrl="https://your-api.com/treatment-groups" // optional
+            />
           </div>
 
-          {/* Lab Color Values */}
-          <div className="lab-color-values my-16">
-            <h1 className="ts-header text-xl">Lab Color Values</h1>
-            <h2 className="ts-sub-header text-base font-light">
-              Please enter the respective values in the correct field.
+          <div className="mt-4">
+            <h2 className="text-sm md:text-base font-semibold">
+              Treatment Stage
             </h2>
+            <p className="text-xs md:text-sm text-gray-600">
+              Select the specific treatment phase of resin infiltration for
+              which you wish to evaluate L, a*, b* values.*
+            </p>
+            <Dropdown
+              onSelect={handleStageChange}
+              placeholder="Select Treatment Stage"
+              fallbackOptions={treatmentStages.map((stage) => ({
+                label: `${stage.code} - ${stage.label}`,
+                code: stage.code,
+              }))}
+              optionKey="label"
+            />
+          </div>
 
-            {/* L Value */}
-            <div className="L-value mt-5">
-              <h1 className="text-tertiaryColor text-base font-normal">
-                L (<span className="italic">Lightness</span>) Value
-              </h1>
-              <InputField
-                value={lValue}
-                onChange={setLValue}
-                placeholder="Enter the value here..."
-              />
+          <div className="mt-4 md:mt-6">
+            <h2 className="text-sm md:text-base font-semibold">
+              LAB Color Values (Mean ± SD)
+            </h2>
+            <p className="text-xs md:text-sm text-gray-600">
+              Input mean ± standard deviation for L, a*, and b* to assess
+              alignment with reference ranges and determine effect sizes using
+              Cohen’s d.*
+            </p>
+
+            {/* L Row */}
+            <div className="mt-4 flex gap-2">
+              <div className="w-[65%]">
+                <h3 className="text-sm font-medium">L (Lightness) – Mean</h3>
+                <InputField
+                  value={lValue}
+                  onChange={setLValue}
+                  placeholder="Enter L* value"
+                />
+              </div>
+              <div className="w-[35%]">
+                <h3 className="text-sm font-medium">L – SD</h3>
+                <InputField
+                  value={lSD}
+                  onChange={setLSD}
+                  placeholder="Enter SD-L"
+                />
+              </div>
             </div>
 
-            {/* A Value */}
-            <div className="A-value mt-5">
-              <h1 className="text-tertiaryColor text-base font-normal">
-                a (<span className="italic">Green to Red</span>) Value
-              </h1>
-              <InputField
-                value={aValue}
-                onChange={setAValue}
-                placeholder="Enter the value here..."
-              />
+            {/* a Row */}
+            <div className="mt-4 flex gap-2">
+              <div className="w-[65%]">
+                <h3 className="text-sm font-medium">a (Green to Red) – Mean</h3>
+                <InputField
+                  value={aValue}
+                  onChange={setAValue}
+                  placeholder="Enter a* value"
+                />
+              </div>
+              <div className="w-[35%]">
+                <h3 className="text-sm font-medium">a – SD</h3>
+                <InputField
+                  value={aSD}
+                  onChange={setASD}
+                  placeholder="Enter SD-a"
+                />
+              </div>
             </div>
 
-            {/* B Value */}
-            <div className="B-value mt-5">
-              <h1 className="text-tertiaryColor text-base font-normal">
-                b (<span className="italic">Blue to Yellow</span>) Value
-              </h1>
-              <InputField
-                value={bValue}
-                onChange={setBValue}
-                placeholder="Enter the value here..."
-              />
+            {/* b Row */}
+            <div className="mt-4 flex gap-2">
+              <div className="w-[65%]">
+                <h3 className="text-sm font-medium">
+                  b (Blue to Yellow) – Mean
+                </h3>
+                <InputField
+                  value={bValue}
+                  onChange={setBValue}
+                  placeholder="Enter b* value"
+                />
+              </div>
+              <div className="w-[35%]">
+                <h3 className="text-sm font-medium">b – SD</h3>
+                <InputField
+                  value={bSD}
+                  onChange={setBSD}
+                  placeholder="Enter SD-b"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Evaluate Button */}
-          <div className="evaluate-button flex justify-center">
-            <Button1 text="Evaluate" onClick={handleEvaluateClick} />
+          <div className="flex justify-center mt-4 md:mt-6 lg:mt-6 xl:mt-4">
+            <Button text="Evaluate" onClick={handleEvaluateClick} />
           </div>
 
-          {/* Result Display */}
           {result && <ResultDisplay result={result} />}
         </div>
 
-        <button onClick={handleAdminLoginClick} className="text-sixthColor text-lg font-thin hover:text-tertiaryColor hover:font-normal underline">Management</button>
+        {/* ToothBG Image with Management Button */}
+        <div className="hidden lg:flex w-full lg:w-2/3 items-center justify-center bg-gray-100 relative">
+          <img
+            src={ToothBG}
+            alt="Tooth Model"
+            className="object-cover h-full w-full"
+          />
+          <button
+            onClick={handleAdminLoginClick}
+            className="absolute right-8 top-6 text-xs sm:text-sm md:text-base lg:text-lg text-[#8a5641] hover:text-tertiaryColor font-medium"
+          >
+            <IoIosSettings className="h-10 w-10" />
+          </button>
+        </div>
       </div>
     </div>
   );

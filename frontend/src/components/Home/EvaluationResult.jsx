@@ -1,55 +1,100 @@
-import React, { useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import { FaThumbsUp, FaExclamationTriangle, FaTimesCircle } from "react-icons/fa";
-import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for Toastify
+// components/Home/EvaluationResult.jsx
 
-const EvaluationResult = ({ result }) => {
-  const resultTypes = {
-    normal: {
-      icon: <FaThumbsUp className="w-6 h-6 text-green-600" />,
-      message: "Value within the normal range",
-      styles: "text-green-600",
-      bgColor: "bg-green-200",
-    },
-    borderline: {
-      icon: <FaExclamationTriangle className="w-6 h-6 text-orange-600" />,
-      message: "Borderline - Minor Adjustments Suggested",
-      styles: "text-orange-600",
-      bgColor: "bg-orange-200",
-    },
-    outOfRange: {
-      icon: <FaTimesCircle className="w-6 h-6 text-red-600" />,
-      message: "Out of range - Adjust Experimental Setup",
-      styles: "text-red-600",
-      bgColor: "bg-red-200",
-    },
-  };
+import React from "react";
+import { FaInfoCircle } from "react-icons/fa";
 
-  useEffect(() => {
-    if (result && resultTypes[result]) {
-      const { icon, message, styles, bgColor } = resultTypes[result];
+export default function EvaluationResult({ result }) {
+  if (!result) return null;
 
-      // Use toast to display the message
-      toast.info(
-        <div className={`flex gap-2 items-center ${bgColor}`}>
-          {/* {icon} Display the icon only */}
-          <span className={`${styles}`}>{message}</span> {/* Display the message */}
-        </div>,
-        {
-          position: "bottom-right", // Adjust the position as needed
-          autoClose: 5000, // Duration for the toast to stay
-          hideProgressBar: false,
-          closeOnClick: true,
-          draggable: true,
-          progress: undefined,
-          icon: icon,
-          className: `${bgColor}`,
-        }
-      );
-    }
-  }, [result]); // Dependency array includes result to show the toast on change
+  const {
+    selectedGroup,
+    treatmentStage,
+    overallAssessment,
+    individualParameters,
+    referenceCohensD,
+  } = result;
 
-  return <ToastContainer />;
-};
+  const fmt = (num) => (num != null ? num.toFixed(1) : "–");
 
-export default EvaluationResult;
+  return (
+    <div className="mt-6 p-6 bg-white rounded-lg shadow">
+      {/* Context Summary */}
+      <div className="mb-4">
+        <p className="text-sm text-gray-700">Selected Group: {selectedGroup}</p>
+        <p className="text-sm text-gray-700">
+          Treatment Stage: {treatmentStage}
+        </p>
+      </div>
+
+      {/* Overall Assessment */}
+      <div className="flex items-center mb-6">
+        <p className="text-md text-gray-800">{overallAssessment.message}</p>
+      </div>
+
+      {/* Detailed Results Table */}
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="border px-4 py-2 text-left">Parameter</th>
+              <th className="border px-4 py-2">Your Value</th>
+              <th className="border px-4 py-2">Ref. 95% CI</th>
+              <th className="border px-4 py-2">Ref. 99% CI</th>
+              <th className="border px-4 py-2">Status</th>
+              <th className="border px-4 py-2 text-left">Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(individualParameters).map(([key, data]) => (
+              <React.Fragment key={key}>
+                <tr>
+                  <td className="border px-4 py-2">{key}* (Mean)</td>
+                  <td className="border px-4 py-2 text-center">
+                    {fmt(data.mean.value)}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {fmt(data.mean.ref95.lower)}–{fmt(data.mean.ref95.upper)}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {fmt(data.mean.ref99.lower)}–{fmt(data.mean.ref99.upper)}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {data.mean.status}
+                  </td>
+                  <td className="border px-4 py-2">
+                    {data.mean.interpretation}
+                  </td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="border px-4 py-2">{key}* (SD)</td>
+                  <td className="border px-4 py-2 text-center">
+                    {fmt(data.sd.value)}
+                  </td>
+                  <td className="border px-4 py-2 text-center">–</td>
+                  <td className="border px-4 py-2 text-center">–</td>
+                  <td className="border px-4 py-2 text-center">
+                    {data.sd.status}
+                  </td>
+                  <td className="border px-4 py-2">{data.sd.interpretation}</td>
+                </tr>
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Reference Cohen's d */}
+      {referenceCohensD.value != null && (
+        <div className="mt-6 p-4 bg-gray-100 rounded">
+          <p className="flex items-center text-gray-800">
+            <FaInfoCircle className="w-5 h-5 mr-2 text-gray-600" />
+            Reference effect size (Cohen’s d): {fmt(referenceCohensD.value)}
+          </p>
+          <p className="mt-1 text-sm text-gray-700">
+            {referenceCohensD.interpretation}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

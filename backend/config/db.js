@@ -1,22 +1,33 @@
-// config/db.js
-const mongoose = require('mongoose');
-require('dotenv').config(); // Load environment variables from .env file
+// db/connectDB.js
+
+const mongoose = require("mongoose");
+require("dotenv").config();
+
+const { MONGODB_URI, MONGODB_DB_NAME } = process.env;
+
+if (!MONGODB_URI) {
+  console.error("❌ Missing MONGODB_URI");
+  process.exit(1);
+}
+
+if (!MONGODB_DB_NAME) {
+  console.error("❌ Missing MONGODB_DB_NAME");
+  process.exit(1);
+}
 
 const connectDB = async () => {
   try {
-    // Use the MONGODB_URI from environment variables
-    const mongoURI = process.env.MONGODB_URI;
-    
-    if (!mongoURI) {
-      throw new Error('MongoDB URI is not defined in environment variables. Please check your .env file.');
-    }
-    
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB connected successfully');
-    return mongoose.connection;
+    const conn = await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      dbName: MONGODB_DB_NAME,
+    });
+    console.log(
+      `✅ MongoDB connected: ${conn.connection.host}/${conn.connection.name}`
+    );
+    return conn.connection;
   } catch (error) {
-    console.error('MongoDB connection error:', error.message);
-    // Exit process with failure
+    console.error("❌ MongoDB connection failed:", error.message);
     process.exit(1);
   }
 };
