@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const referenceValueRoutes = require('./routes/referenceValueRoutes');
 const treatmentStageRoutes = require('./routes/treatmentStageRoutes');
 const evaluationResultRoutes = require("./routes/evaluationResultRoutes");
 const http = require("http");
@@ -27,6 +28,7 @@ const io = new Server(server);
 // Use the treatment stages routes
 app.use('/treatment-stages', treatmentStageRoutes);
 app.use('/evaluation', evaluationResultRoutes);
+app.use('/reference-values', referenceValueRoutes);
 
 // Socket.IO event handling
 io.on('connection', (socket) => {

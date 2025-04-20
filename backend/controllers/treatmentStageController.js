@@ -3,7 +3,7 @@ const TreatmentStage = require('../models/TreatmentStage');
 // Fetch all treatment stages
 const getTreatmentStages = async (req, res) => {
   try {
-    const stages = await TreatmentStage.find();
+    const stages = await TreatmentStage.find().sort({ name: 1 });
     res.json(stages);
   } catch (error) {
     console.error('Error fetching treatment stages:', error);
@@ -85,9 +85,34 @@ const checkValueRange = async (req, res) => {
   }
 };
 
+// Create a new treatment stage
+const createTreatmentStage = async (req, res) => {
+  const { name, ranges } = req.body;
+
+  if (!name || !ranges || !ranges['95%'] || !ranges['99%']) {
+    return res.status(400).json({ message: 'Missing required fields: name and both confidence intervals (95% and 99%)' });
+  }
+
+  try {
+    const existing = await TreatmentStage.findOne({ name });
+    if (existing) {
+      return res.status(409).json({ message: 'Treatment stage with this name already exists' });
+    }
+
+    const newStage = new TreatmentStage({ name, ranges });
+    await newStage.save();
+
+    res.status(201).json({ message: 'Treatment stage created successfully', stage: newStage });
+  } catch (error) {
+    console.error('Error creating treatment stage:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   getTreatmentStages,
   getTreatmentStageByName,
   updateTreatmentStage,
   checkValueRange,
+  createTreatmentStage,
 };
