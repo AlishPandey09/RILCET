@@ -2,12 +2,10 @@ import React from "react";
 import { Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./App.css";
 import AdminPanel from "./pages/AdminPanel";
 import AdminLogin from "./pages/AdminLogin";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute"; // Adjust the import path as necessary
-import HomeUIUpdate from "./pages/Home";
 
 function App() {
   return (

@@ -6,14 +6,19 @@ const Dropdown = ({
   onSelect,
   placeholder,
   fetchUrl,
-  optionKey = "label", // key to display from each object
+  optionKey = "label",
   fallbackOptions = [],
+  selectedValue = "",
 }) => {
-  const [selectedOption, setSelectedOption] = useState("");
+  const [selectedOption, setSelectedOption] = useState(selectedValue);
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState([]);
   const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    setSelectedOption(selectedValue);
+  }, [selectedValue]);
 
   // Handle dropdown selection
   const handleSelectChange = (option) => {

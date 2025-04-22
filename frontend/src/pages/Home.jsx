@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Dropdown from "../components/Home/DropDown.jsx";
 import InputField from "../components/Home/InputField.jsx";
 import ResultDisplay from "../components/Home/EvaluationResult.jsx";
 import Button from "../components/Home/Button1.jsx";
 import { toast } from "react-toastify";
-import axios from "axios";
 import { IoIosSettings } from "react-icons/io";
-
-// Importing Images
 import SMTooth from "../assets/images/sm-tooth.jpg";
-import ToothBG from "../assets/images/tooth-with-bg.jpg";
+import Tooth from "../assets/images/tooth-3d.png";
 import { treatmentGroups, treatmentStages } from "../constants/constant.js";
 import { evaluateLabValues } from "../api/evaluate.js";
+import RefreshButton from "../components/Home/RefreshButton.jsx";
 
 const Home = () => {
   const [lValue, setLValue] = useState("");
@@ -114,6 +111,19 @@ const Home = () => {
     window.open("/admin-login", "_blank");
   };
 
+  const handleRefreshClick = () => {
+    setLValue("");
+    setAValue("");
+    setBValue("");
+    setLSD("");
+    setASD("");
+    setBSD("");
+    setResult(null);
+    setSelectedGroup("");
+    setSelectedStage("");
+    toast.info("Form reset successfully.");
+  };
+
   return (
     <div
       className="relative w-full h-screen flex flex-col lg:flex-row justify-center items-center px-8 sm:px-24 md:px-48 lg:px-24 text-tertiaryColor"
@@ -124,12 +134,15 @@ const Home = () => {
     >
       {/* <ComponentChecks /> */}
       {/* Right Side Image Content for Smaller Screens */}
-      <div className="w-full lg:w-2/3 flex lg:hidden items-center justify-center bg-gray-100 relative">
-        <img
-          src={SMTooth}
-          alt="Tooth Model"
-          className="object-cover h-24 w-full"
-        />
+      <div className="w-full lg:w-2/3 h-24 flex lg:hidden items-center justify-center bg-resin-gradient relative">
+        <div>
+          <h2 className="text-center text-[10px] font-md text-white mb-2">
+            LAB Color Tool for Resin-Infiltrated
+          </h2>
+          <h1 className="text-center text-3xl font-bold text-white">
+            White Spot Lesions
+          </h1>
+        </div>
         <button
           onClick={handleAdminLoginClick}
           className="absolute right-4 top-2 text-xs sm:text-sm text-[#8a5641] hover:text-tertiaryColor"
@@ -138,8 +151,8 @@ const Home = () => {
         </button>
       </div>
 
-      <div className="w-full lg:w-[1200px] lg:flex bg-white shadow-lg max-w-[1024px] ">
-        <div className="p-4 md:p-6 xl:p-10 flex flex-col justify-between w-full lg:w-[60%] h-[550px] lg:h-[750px] md:h-[600px] sm:h-[550px] overflow-y-scroll">
+      <div className="w-full lg:w-[1400px] lg:flex bg-white shadow-lg">
+        <div className="p-4 md:p-6 xl:p-10 flex flex-col justify-between h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)] lg:w-[40%] overflow-y-auto">
           <h1 className="text-md sm:text-lg md:text-xl lg:text-2xl font-semibold text-ninthColor hidden lg:block">
             Lab Color Evaluation Tool For <span>Resin Infiltration</span>
           </h1>
@@ -157,6 +170,7 @@ const Home = () => {
               placeholder="Select Treatment Group"
               fallbackOptions={treatmentGroups}
               optionKey="label"
+              selectedValue={selectedGroup}
               // fetchUrl="https://your-api.com/treatment-groups" // optional
             />
           </div>
@@ -177,6 +191,7 @@ const Home = () => {
                 code: stage.code,
               }))}
               optionKey="label"
+              selectedValue={selectedStage}
             />
           </div>
 
@@ -191,8 +206,8 @@ const Home = () => {
             </p>
 
             {/* L Row */}
-            <div className="mt-4 flex gap-2">
-              <div className="w-[65%]">
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <div className="w-full sm:w-[60%]">
                 <h3 className="text-sm font-medium">L (Lightness) – Mean</h3>
                 <InputField
                   value={lValue}
@@ -200,7 +215,7 @@ const Home = () => {
                   placeholder="Enter L* value"
                 />
               </div>
-              <div className="w-[35%]">
+              <div className="w-full sm:w-[40%]">
                 <h3 className="text-sm font-medium">L – SD</h3>
                 <InputField
                   value={lSD}
@@ -211,8 +226,8 @@ const Home = () => {
             </div>
 
             {/* a Row */}
-            <div className="mt-4 flex gap-2">
-              <div className="w-[65%]">
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <div className="w-full sm:w-[60%]">
                 <h3 className="text-sm font-medium">a (Green to Red) – Mean</h3>
                 <InputField
                   value={aValue}
@@ -220,7 +235,7 @@ const Home = () => {
                   placeholder="Enter a* value"
                 />
               </div>
-              <div className="w-[35%]">
+              <div className="w-full sm:w-[40%]">
                 <h3 className="text-sm font-medium">a – SD</h3>
                 <InputField
                   value={aSD}
@@ -231,8 +246,8 @@ const Home = () => {
             </div>
 
             {/* b Row */}
-            <div className="mt-4 flex gap-2">
-              <div className="w-[65%]">
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <div className="w-full sm:w-[60%]">
                 <h3 className="text-sm font-medium">
                   b (Blue to Yellow) – Mean
                 </h3>
@@ -242,7 +257,7 @@ const Home = () => {
                   placeholder="Enter b* value"
                 />
               </div>
-              <div className="w-[35%]">
+              <div className="w-full sm:w-[40%]">
                 <h3 className="text-sm font-medium">b – SD</h3>
                 <InputField
                   value={bSD}
@@ -253,27 +268,46 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="flex justify-center mt-4 md:mt-6 lg:mt-6 xl:mt-4">
+          <div className="flex justify-center mt-4 md:mt-6 lg:mt-6 xl:mt-4 gap-2">
             <Button text="Evaluate" onClick={handleEvaluateClick} />
+            <RefreshButton onClick={handleRefreshClick} />
           </div>
 
-          {result && <ResultDisplay result={result} />}
+          <div className="fkex lg:hidden">
+            <ResultDisplay result={result} />
+          </div>
         </div>
 
+        {result ? (
+          <div className="hidden h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)] flex-1 lg:flex overflow-y-scroll">
+            <ResultDisplay result={result} />
+          </div>
+        ) : (
+          <div className="hidden lg:flex flex-1 flex-col items-center justify-center bg-resin-gradient relative">
+            <img
+              src={Tooth}
+              alt="Tooth Model"
+              className="drop-shadow-[0_25px_30px_rgba(0,0,0,0.4)]"
+            />
+            <div className="mt-16">
+              <h2 className="text-center text-md font-semibold text-white mb-2">
+                LAB Color Tool for Resin-Infiltrated
+              </h2>
+              <h1 className="text-center text-6xl font-semibold text-white">
+                White Spot Lesions
+              </h1>
+            </div>
+
+            <button
+              onClick={handleAdminLoginClick}
+              className="absolute right-8 top-6 text-xs sm:text-sm md:text-base lg:text-lg text-[#8a5641] hover:text-tertiaryColor font-medium"
+            >
+              <IoIosSettings className="h-10 w-10" />
+            </button>
+          </div>
+        )}
+
         {/* ToothBG Image with Management Button */}
-        <div className="hidden lg:flex w-full lg:w-2/3 items-center justify-center bg-gray-100 relative">
-          <img
-            src={ToothBG}
-            alt="Tooth Model"
-            className="object-cover h-full w-full"
-          />
-          <button
-            onClick={handleAdminLoginClick}
-            className="absolute right-8 top-6 text-xs sm:text-sm md:text-base lg:text-lg text-[#8a5641] hover:text-tertiaryColor font-medium"
-          >
-            <IoIosSettings className="h-10 w-10" />
-          </button>
-        </div>
       </div>
     </div>
   );
