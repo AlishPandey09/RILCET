@@ -1,8 +1,6 @@
-// controllers/referenceController.js
-
-const fs = require("fs");
-const XLSX = require("xlsx");
-const ReferenceValues = require("../models/reference.model");
+import fs from "fs";
+import XLSX from "xlsx";
+import ReferenceValues from "../models/reference.model.js";
 
 const treatmentGroups = [
   "Control (no treatment before re-bleaching)",
@@ -29,7 +27,7 @@ function calculateCohensD(currentMean, currentSD, prevMean, prevSD) {
   return parseFloat(((currentMean - prevMean) / pooledSD).toFixed(2));
 }
 
-exports.uploadReferenceCSV = async (req, res) => {
+export const uploadReferenceCSV = async (req, res) => {
   if (!req.file) {
     return res
       .status(400)
@@ -62,11 +60,9 @@ exports.uploadReferenceCSV = async (req, res) => {
     const rawStage = (row.timepoint || "").toString().trim();
     if (!rawGroup || !rawStage) return;
 
-    // Map to full group label
     const groupName =
       treatmentGroups.find((g) => g.startsWith(rawGroup)) || rawGroup;
 
-    // Extract code from rawStage, then map to formatted "CODE - Label"
     let stageName = rawStage;
     const codeMatch = rawStage.match(/^T(\d+)/);
     if (codeMatch) {

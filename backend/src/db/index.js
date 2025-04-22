@@ -1,7 +1,4 @@
-// db/connectDB.js
-
-const mongoose = require("mongoose");
-require("dotenv").config();
+import mongoose from "mongoose";
 
 const { MONGODB_URI, MONGODB_DB_NAME } = process.env;
 
@@ -22,9 +19,6 @@ const connectDB = async () => {
       useUnifiedTopology: true,
       dbName: MONGODB_DB_NAME,
     });
-    console.log(
-      `✅ MongoDB connected: ${conn.connection.host}/${conn.connection.name}`
-    );
     return conn.connection;
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
@@ -32,4 +26,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+export default connectDB;

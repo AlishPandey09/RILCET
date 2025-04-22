@@ -1,6 +1,4 @@
-// controllers/evaluateController.js
-
-const ReferenceValues = require("../models/reference.model");
+import ReferenceValues from "../models/reference.model.js";
 
 // Interpretation texts from your spec
 const meanInterpretations = {
@@ -19,7 +17,6 @@ const sdInterpretations = {
   fallback: "Standard deviation recorded for confidence interval estimation.",
 };
 
-// Cohen’s d ranges
 const dRanges = [
   {
     min: 0.0,
@@ -61,21 +58,17 @@ function evaluateMean(val, ci95, ci99) {
 
 function interpretD(d) {
   const entry = dRanges.find((r) => d >= r.min && d <= r.max);
-  console.log("Cohen's d entry:", entry, d);
   return entry ? entry.message : "";
 }
 
-exports.evaluate = async (req, res) => {
+export async function evaluate(req, res) {
   const { treatmentGroup, treatmentStage, userValues } = req.body;
+
   if (!treatmentGroup || !treatmentStage || !userValues) {
     return res
       .status(400)
       .json({ error: "Missing treatmentGroup, treatmentStage, or userValues" });
   }
-
-  console.log(
-    `Evaluating treatment group: ${treatmentGroup}, stage: ${treatmentStage}`
-  );
 
   const refDoc = await ReferenceValues.findOne({
     treatmentGroup,
@@ -94,26 +87,25 @@ exports.evaluate = async (req, res) => {
   let worst = "within_95";
 
   paramKeys.forEach((key) => {
-    // mean status & interpretation
     const userMean = userValues[key].mean;
     const statusKey = evaluateMean(userMean, rd[key].ci95, rd[key].ci99);
+
     const symbol =
       statusKey === "within_95"
         ? "✅"
         : statusKey === "within_99"
         ? "🟧"
         : "❌";
+
     const interp =
       statusKey === "outside_99"
         ? meanInterpretations.outside_99[key]
         : meanInterpretations[statusKey];
 
-    // track worst overall
     if (statusKey === "outside_99") worst = "outside_99";
     else if (statusKey === "within_99" && worst === "within_95")
       worst = "within_99";
 
-    // SD fallback
     individual[key] = {
       mean: {
         value: userMean,
@@ -130,7 +122,6 @@ exports.evaluate = async (req, res) => {
     };
   });
 
-  // overall assessment
   const overall = {
     symbol: worst === "within_95" ? "🟢" : worst === "within_99" ? "🟧" : "❌",
     message:
@@ -141,7 +132,6 @@ exports.evaluate = async (req, res) => {
         : "❌ Significant color deviation detected. One or more parameters lie outside the 99% confidence interval.",
   };
 
-  // reference Cohen's d block
   const refD = rd.cohensD;
   const refDInterp = refD != null ? interpretD(refD) : "";
 
@@ -155,4 +145,4 @@ exports.evaluate = async (req, res) => {
       interpretation: refDInterp,
     },
   });
-};
+}

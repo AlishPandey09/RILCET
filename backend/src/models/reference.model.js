@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const referenceValuesSchema = new mongoose.Schema({
   treatmentGroup: String,
@@ -44,4 +44,8 @@ const referenceValuesSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("ReferenceValues", referenceValuesSchema);
+const ReferenceValues = mongoose.model(
+  "ReferenceValues",
+  referenceValuesSchema
+);
+export default ReferenceValues;
