@@ -62,10 +62,20 @@ function evaluateMean(val, ci95, ci99) {
   return "outside_99";
 }
 
-// Evaluate SD against reference variation thresholds
-function evaluateSD(userSD, sd95, sd99) {
-  if (userSD >= sd95.lower && userSD <= sd95.upper) return "within_95";
-  if (userSD >= sd99.lower && userSD <= sd99.upper) return "within_99";
+// Evaluate SD using ci95.sd and ci99.sd
+function evaluateSD(userSD, ci95, ci99) {
+  if (
+    typeof userSD !== "number" ||
+    typeof ci95?.lower !== "number" ||
+    typeof ci95?.upper !== "number" ||
+    typeof ci99?.lower !== "number" ||
+    typeof ci99?.upper !== "number"
+  ) {
+    return "fallback";
+  }
+
+  if (userSD >= ci95.lower && userSD <= ci95.upper) return "within_95";
+  if (userSD >= ci99.lower && userSD <= ci99.upper) return "within_99";
   return "outside_99";
 }
 
@@ -104,7 +114,11 @@ export async function evaluate(req, res) {
   paramKeys.forEach((key) => {
     const userMean = userValues[key].mean;
     const userSD = userValues[key].sd;
-    const statusKey = evaluateMean(userMean, rd[key].ci95, rd[key].ci99);
+    const statusKey = evaluateMean(
+      userMean,
+      rd[key].ci95.mean,
+      rd[key].ci99.mean
+    );
 
     const symbol =
       statusKey === "within_95"
@@ -126,22 +140,30 @@ export async function evaluate(req, res) {
     let sdStatusKey = "fallback";
     let sdInterp = sdInterpretations.fallback;
 
-    if (rd[key].sd95 && rd[key].sd99) {
-      sdStatusKey = evaluateSD(userSD, rd[key].sd95, rd[key].sd99);
+    if (rd[key]?.ci95?.sd && rd[key]?.ci99?.sd) {
+      sdStatusKey = evaluateSD(userSD, rd[key].ci95.sd, rd[key].ci99.sd);
       sdInterp = sdInterpretations[sdStatusKey];
     }
 
     individual[key] = {
       mean: {
         value: userMean,
-        ref95: rd[key].ci95,
-        ref99: rd[key].ci99,
+        ref95: rd[key].ci95.mean,
+        ref99: rd[key].ci99.mean,
         status: symbol,
         interpretation: interp,
       },
       sd: {
         value: userSD,
         status: "–",
+        ref95:
+          sdStatusKey !== "fallback"
+            ? rd[key].ci95.sd
+            : { lower: "–", upper: "–" },
+        ref99:
+          sdStatusKey !== "fallback"
+            ? rd[key].ci99.sd
+            : { lower: "–", upper: "–" },
         interpretation: sdInterp,
       },
     };
