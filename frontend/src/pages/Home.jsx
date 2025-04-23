@@ -153,6 +153,9 @@ const Home = () => {
 
       <div className="w-full lg:w-[1400px] lg:flex bg-white shadow-lg">
         <div className="p-4 md:p-6 xl:p-10 flex flex-col justify-between h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)] lg:w-[40%] overflow-y-auto">
+        <h1 className="text-md sm:text-lg md:text-xl lg:text-2xl font-semibold text-ninthColor hidden lg:block">
+            LAB Color Tool for Resin-Infiltrated <span>White Spot Lesions</span>
+          </h1>
           <div className="mt-4">
             <h2 className="text-sm md:text-base font-semibold">
               Treatment Group
@@ -285,11 +288,11 @@ const Home = () => {
               alt="Tooth Model"
               className="drop-shadow-[0_25px_30px_rgba(0,0,0,0.4)]"
             />
-            <div className="mt-16">
-              <h2 className="text-center text-md font-semibold text-white mb-2">
+            <div className="mt-4">
+              <h1 className="text-center text-3xl font-semibold text-white mb-2">
                 LAB Color Tool for Resin-Infiltrated
-              </h2>
-              <h1 className="text-center text-6xl font-semibold text-white">
+              </h1>
+              <h1 className="text-center text-3xl font-semibold text-white">
                 White Spot Lesions
               </h1>
             </div>
