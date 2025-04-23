@@ -16,6 +16,7 @@ const colorParamSchema = {
     mean: ciSchema,
     sd: ciSchema,
   },
+  cohensD: Number,
 };
 
 const referenceValuesSchema = new mongoose.Schema({
@@ -25,9 +26,11 @@ const referenceValuesSchema = new mongoose.Schema({
     L: colorParamSchema,
     a: colorParamSchema,
     b: colorParamSchema,
-    cohensD: Number,
   },
 });
 
-const ReferenceValues = mongoose.model("reference_values", referenceValuesSchema);
+const ReferenceValues = mongoose.model(
+  "reference_values",
+  referenceValuesSchema
+);
 export default ReferenceValues;

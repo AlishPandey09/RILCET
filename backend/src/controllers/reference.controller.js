@@ -35,7 +35,9 @@ export const uploadReferenceCSV = async (req, res) => {
   }
 
   const sheetName = workbook.SheetNames[0];
-  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+    defval: "",
+  });
   if (!rows.length) {
     fs.unlinkSync(filePath);
     return res.status(400).json({ error: "Excel sheet is empty" });
@@ -48,7 +50,8 @@ export const uploadReferenceCSV = async (req, res) => {
     const rawStage = (row.timepoint || "").toString().trim();
     if (!rawGroup || !rawStage) return;
 
-    const groupName = treatmentGroups.find((g) => g.startsWith(rawGroup)) || rawGroup;
+    const groupName =
+      treatmentGroups.find((g) => g.startsWith(rawGroup)) || rawGroup;
 
     let stageName = rawStage;
     const codeMatch = rawStage.match(/^T(\d+)/);
@@ -83,25 +86,19 @@ export const uploadReferenceCSV = async (req, res) => {
           upper: parseFloat(row[`${prefix}_sd_ci_99_upper`]),
         },
       },
+      cohensD: isNaN(parseFloat(row[`cohensD_${prefix}`]))
+        ? null
+        : parseFloat(row[`cohensD_${prefix}`]),
     });
 
     const L = getParam("L");
     const a = getParam("a");
     const b = getParam("b");
 
-    const dL = parseFloat(row.cohensD_L);
-    const dA = parseFloat(row.cohensD_a);
-    const dB = parseFloat(row.cohensD_b);
-
-    let cohensD = null;
-    if (!isNaN(dL) && !isNaN(dA) && !isNaN(dB)) {
-      cohensD = parseFloat(((dL + dA + dB) / 3).toFixed(2));
-    }
-
     entries.push({
       treatmentGroup: groupName,
       treatmentStage: stageName,
-      referenceData: { L, a, b, cohensD },
+      referenceData: { L, a, b },
     });
   });
 

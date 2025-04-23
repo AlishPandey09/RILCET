@@ -79,10 +79,11 @@ function evaluateSD(userSD, ci95, ci99) {
   return "outside_99";
 }
 
-// Cohen’s d interpretation
+// Interpret Cohen’s d
 function interpretD(d) {
+  if (typeof d !== "number" || isNaN(d)) return "Not available";
   const entry = dRanges.find((r) => d >= r.min && d <= r.max);
-  return entry ? entry.message : "";
+  return entry ? entry.message : "Not available";
 }
 
 // Main evaluation endpoint
@@ -159,11 +160,11 @@ export async function evaluate(req, res) {
         ref95:
           sdStatusKey !== "fallback"
             ? rd[key].ci95.sd
-            : { lower: "–", upper: "–" },
+            : { lower: null, upper: null },
         ref99:
           sdStatusKey !== "fallback"
             ? rd[key].ci99.sd
-            : { lower: "–", upper: "–" },
+            : { lower: null, upper: null },
         interpretation: sdInterp,
       },
     };
@@ -179,8 +180,17 @@ export async function evaluate(req, res) {
         : "❌ Significant color deviation detected. One or more parameters lie outside the 99% confidence interval.",
   };
 
-  const refD = rd.cohensD;
-  const refDInterp = refD != null ? interpretD(refD) : "";
+  const refCohensD = {
+    L: rd.L?.cohensD ?? null,
+    a: rd.a?.cohensD ?? null,
+    b: rd.b?.cohensD ?? null,
+  };
+
+  const refCohensDInterp = {
+    L: refCohensD.L != null ? interpretD(refCohensD.L) : "Not available",
+    a: refCohensD.a != null ? interpretD(refCohensD.a) : "Not available",
+    b: refCohensD.b != null ? interpretD(refCohensD.b) : "Not available",
+  };
 
   return res.json({
     selectedGroup: treatmentGroup,
@@ -188,8 +198,18 @@ export async function evaluate(req, res) {
     overallAssessment: overall,
     individualParameters: individual,
     referenceCohensD: {
-      value: refD,
-      interpretation: refDInterp,
+      L: {
+        value: refCohensD.L,
+        interpretation: refCohensDInterp.L,
+      },
+      a: {
+        value: refCohensD.a,
+        interpretation: refCohensDInterp.a,
+      },
+      b: {
+        value: refCohensD.b,
+        interpretation: refCohensDInterp.b,
+      },
     },
   });
 }
