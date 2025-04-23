@@ -1,6 +1,6 @@
 import ReferenceValues from "../models/reference.model.js";
 
-// Interpretation texts from your spec
+// Mean interpretation texts
 const meanInterpretations = {
   within_95:
     "The value is within the 95% reference interval, indicating no relevant deviation from the expected range at this treatment stage.",
@@ -13,10 +13,15 @@ const meanInterpretations = {
   },
 };
 
+// SD interpretation texts
 const sdInterpretations = {
+  within_95: "Standard deviation is within expected variability.",
+  within_99: "Slightly elevated SD – minor measurement variability.",
+  outside_99: "High SD – possible inconsistency in color measurements.",
   fallback: "Standard deviation recorded for confidence interval estimation.",
 };
 
+// Cohen's d interpretation ranges
 const dRanges = [
   {
     min: 0.0,
@@ -50,24 +55,34 @@ const dRanges = [
   },
 ];
 
+// Evaluate if value falls within 95%, 99%, or outside
 function evaluateMean(val, ci95, ci99) {
   if (val >= ci95.lower && val <= ci95.upper) return "within_95";
   if (val >= ci99.lower && val <= ci99.upper) return "within_99";
   return "outside_99";
 }
 
+// Evaluate SD against reference variation thresholds
+function evaluateSD(userSD, sd95, sd99) {
+  if (userSD >= sd95.lower && userSD <= sd95.upper) return "within_95";
+  if (userSD >= sd99.lower && userSD <= sd99.upper) return "within_99";
+  return "outside_99";
+}
+
+// Cohen’s d interpretation
 function interpretD(d) {
   const entry = dRanges.find((r) => d >= r.min && d <= r.max);
   return entry ? entry.message : "";
 }
 
+// Main evaluation endpoint
 export async function evaluate(req, res) {
   const { treatmentGroup, treatmentStage, userValues } = req.body;
 
   if (!treatmentGroup || !treatmentStage || !userValues) {
-    return res
-      .status(400)
-      .json({ error: "Missing treatmentGroup, treatmentStage, or userValues" });
+    return res.status(400).json({
+      error: "Missing treatmentGroup, treatmentStage, or userValues",
+    });
   }
 
   const refDoc = await ReferenceValues.findOne({
@@ -76,9 +91,9 @@ export async function evaluate(req, res) {
   });
 
   if (!refDoc) {
-    return res
-      .status(404)
-      .json({ error: "Reference data not found for that group/stage" });
+    return res.status(404).json({
+      error: "Reference data not found for that group/stage",
+    });
   }
 
   const rd = refDoc.referenceData;
@@ -88,6 +103,7 @@ export async function evaluate(req, res) {
 
   paramKeys.forEach((key) => {
     const userMean = userValues[key].mean;
+    const userSD = userValues[key].sd;
     const statusKey = evaluateMean(userMean, rd[key].ci95, rd[key].ci99);
 
     const symbol =
@@ -106,6 +122,15 @@ export async function evaluate(req, res) {
     else if (statusKey === "within_99" && worst === "within_95")
       worst = "within_99";
 
+    // Evaluate SD
+    let sdStatusKey = "fallback";
+    let sdInterp = sdInterpretations.fallback;
+
+    if (rd[key].sd95 && rd[key].sd99) {
+      sdStatusKey = evaluateSD(userSD, rd[key].sd95, rd[key].sd99);
+      sdInterp = sdInterpretations[sdStatusKey];
+    }
+
     individual[key] = {
       mean: {
         value: userMean,
@@ -115,9 +140,9 @@ export async function evaluate(req, res) {
         interpretation: interp,
       },
       sd: {
-        value: userValues[key].sd,
+        value: userSD,
         status: "–",
-        interpretation: sdInterpretations.fallback,
+        interpretation: sdInterp,
       },
     };
   });

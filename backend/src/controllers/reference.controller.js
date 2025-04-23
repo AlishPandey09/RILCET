@@ -22,11 +22,6 @@ const treatmentStages = [
   { code: "T9", label: "After waiting period (14 Days)" },
 ];
 
-function calculateCohensD(currentMean, currentSD, prevMean, prevSD) {
-  const pooledSD = Math.sqrt((prevSD ** 2 + currentSD ** 2) / 2);
-  return parseFloat(((currentMean - prevMean) / pooledSD).toFixed(2));
-}
-
 export const uploadReferenceCSV = async (req, res) => {
   if (!req.file) {
     return res
@@ -110,12 +105,20 @@ export const uploadReferenceCSV = async (req, res) => {
       },
     };
 
+    // Parse individual d values safely
+    const dL = parseFloat(row.cohensD_L);
+    const dA = parseFloat(row.cohensD_a);
+    const dB = parseFloat(row.cohensD_b);
+
+    let cohensD = null;
+    if (!isNaN(dL) && !isNaN(dA) && !isNaN(dB)) {
+      cohensD = parseFloat(((dL + dA + dB) / 3).toFixed(2));
+    }
+
     entries.push({
       treatmentGroup: groupName,
       treatmentStage: stageName,
-      L,
-      a,
-      b,
+      referenceData: { L, a, b, cohensD },
     });
   });
 
@@ -124,36 +127,9 @@ export const uploadReferenceCSV = async (req, res) => {
     return res.status(400).json({ error: "No valid data to upload" });
   }
 
-  entries.sort((x, y) => {
-    const num = (s) => {
-      const m = s.match(/^T(\d+)/);
-      return m ? parseInt(m[1], 10) : 0;
-    };
-    return num(x.treatmentStage) - num(y.treatmentStage);
-  });
-
   try {
-    for (let i = 0; i < entries.length; i++) {
-      const { treatmentGroup, treatmentStage, L, a, b } = entries[i];
-      let cohensD = null;
-      if (i > 0) {
-        const prev = entries[i - 1];
-        cohensD = parseFloat(
-          (
-            (calculateCohensD(L.mean, L.sd, prev.L.mean, prev.L.sd) +
-              calculateCohensD(a.mean, a.sd, prev.a.mean, prev.a.sd) +
-              calculateCohensD(b.mean, b.sd, prev.b.mean, prev.b.sd)) /
-            3
-          ).toFixed(2)
-        );
-      }
-
-      await new ReferenceValues({
-        treatmentGroup,
-        treatmentStage,
-        referenceData: { L, a, b, cohensD },
-      }).save();
-    }
+    await ReferenceValues.deleteMany({}); // Optional: clear existing records
+    await ReferenceValues.insertMany(entries);
 
     fs.unlinkSync(filePath);
     return res.json({ message: "Reference values uploaded and saved" });

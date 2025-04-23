@@ -45,7 +45,7 @@ const referenceValuesSchema = new mongoose.Schema({
 });
 
 const ReferenceValues = mongoose.model(
-  "ReferenceValues",
+  "reference_values",
   referenceValuesSchema
 );
 export default ReferenceValues;

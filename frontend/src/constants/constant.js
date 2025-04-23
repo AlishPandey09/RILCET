@@ -6,7 +6,6 @@ export const treatmentGroups = [
 ];
 
 export const treatmentStages = [
-  { label: "Natural tooth", code: "T0" },
   { label: "After WSL creation", code: "T1" },
   { label: "After resin infiltration", code: "T2" },
   { label: "After bleaching", code: "T3" },
