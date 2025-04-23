@@ -23,11 +23,7 @@ const treatmentStages = [
 ];
 
 export const uploadReferenceCSV = async (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ error: "No file uploaded (check field name)" });
-  }
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
   const filePath = req.file.path;
   let workbook;
@@ -39,10 +35,7 @@ export const uploadReferenceCSV = async (req, res) => {
   }
 
   const sheetName = workbook.SheetNames[0];
-  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
-    defval: "",
-  });
-
+  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
   if (!rows.length) {
     fs.unlinkSync(filePath);
     return res.status(400).json({ error: "Excel sheet is empty" });
@@ -55,8 +48,7 @@ export const uploadReferenceCSV = async (req, res) => {
     const rawStage = (row.timepoint || "").toString().trim();
     if (!rawGroup || !rawStage) return;
 
-    const groupName =
-      treatmentGroups.find((g) => g.startsWith(rawGroup)) || rawGroup;
+    const groupName = treatmentGroups.find((g) => g.startsWith(rawGroup)) || rawGroup;
 
     let stageName = rawStage;
     const codeMatch = rawStage.match(/^T(\d+)/);
@@ -68,44 +60,35 @@ export const uploadReferenceCSV = async (req, res) => {
       }
     }
 
-    const L = {
-      mean: parseFloat(row.L_mean),
-      sd: parseFloat(row.L_sd),
+    const getParam = (prefix) => ({
+      mean: parseFloat(row[`${prefix}_mean`]),
+      sd: parseFloat(row[`${prefix}_sd`]),
       ci95: {
-        lower: parseFloat(row.L_mean_ci_95_lower),
-        upper: parseFloat(row.L_mean_ci_95_upper),
+        mean: {
+          lower: parseFloat(row[`${prefix}_mean_ci_95_lower`]),
+          upper: parseFloat(row[`${prefix}_mean_ci_95_upper`]),
+        },
+        sd: {
+          lower: parseFloat(row[`${prefix}_sd_ci_95_lower`]),
+          upper: parseFloat(row[`${prefix}_sd_ci_95_upper`]),
+        },
       },
       ci99: {
-        lower: parseFloat(row.L_mean_ci_99_lower),
-        upper: parseFloat(row.L_mean_ci_99_upper),
+        mean: {
+          lower: parseFloat(row[`${prefix}_mean_ci_99_lower`]),
+          upper: parseFloat(row[`${prefix}_mean_ci_99_upper`]),
+        },
+        sd: {
+          lower: parseFloat(row[`${prefix}_sd_ci_99_lower`]),
+          upper: parseFloat(row[`${prefix}_sd_ci_99_upper`]),
+        },
       },
-    };
-    const a = {
-      mean: parseFloat(row.a_mean),
-      sd: parseFloat(row.a_sd),
-      ci95: {
-        lower: parseFloat(row.a_mean_ci_95_lower),
-        upper: parseFloat(row.a_mean_ci_95_upper),
-      },
-      ci99: {
-        lower: parseFloat(row.a_mean_ci_99_lower),
-        upper: parseFloat(row.a_mean_ci_99_upper),
-      },
-    };
-    const b = {
-      mean: parseFloat(row.b_mean),
-      sd: parseFloat(row.b_sd),
-      ci95: {
-        lower: parseFloat(row.b_mean_ci_95_lower),
-        upper: parseFloat(row.b_mean_ci_95_upper),
-      },
-      ci99: {
-        lower: parseFloat(row.b_mean_ci_99_lower),
-        upper: parseFloat(row.b_mean_ci_99_upper),
-      },
-    };
+    });
 
-    // Parse individual d values safely
+    const L = getParam("L");
+    const a = getParam("a");
+    const b = getParam("b");
+
     const dL = parseFloat(row.cohensD_L);
     const dA = parseFloat(row.cohensD_a);
     const dB = parseFloat(row.cohensD_b);
@@ -128,9 +111,8 @@ export const uploadReferenceCSV = async (req, res) => {
   }
 
   try {
-    await ReferenceValues.deleteMany({}); // Optional: clear existing records
+    await ReferenceValues.deleteMany({});
     await ReferenceValues.insertMany(entries);
-
     fs.unlinkSync(filePath);
     return res.json({ message: "Reference values uploaded and saved" });
   } catch (error) {
