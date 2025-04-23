@@ -153,7 +153,7 @@ const Home = () => {
 
       <div className="w-full lg:w-[1400px] lg:flex bg-white shadow-lg">
         <div className="p-4 md:p-6 xl:p-10 flex flex-col justify-between h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)] lg:w-[40%] overflow-y-auto">
-        <h1 className="text-md sm:text-lg md:text-xl lg:text-2xl font-semibold text-ninthColor hidden lg:block">
+          <h1 className="text-md sm:text-lg md:text-xl lg:text-2xl font-semibold text-ninthColor hidden lg:block">
             LAB Color Tool for Resin-Infiltrated <span>White Spot Lesions</span>
           </h1>
           <div className="mt-4">
@@ -286,7 +286,7 @@ const Home = () => {
             <img
               src={Tooth}
               alt="Tooth Model"
-              className="drop-shadow-[0_25px_30px_rgba(0,0,0,0.4)]"
+              className="drop-shadow-[0_25px_30px_rgba(0,0,0,0.4)] object-contain w-[50%] h-[50%]"
             />
             <div className="mt-4">
               <h1 className="text-center text-3xl font-semibold text-white mb-2">
