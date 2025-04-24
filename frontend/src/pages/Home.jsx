@@ -286,7 +286,7 @@ const Home = () => {
             <img
               src={Tooth}
               alt="Tooth Model"
-              className="drop-shadow-[0_25px_30px_rgba(0,0,0,0.4)] object-contain w-[50%] h-[50%]"
+              className="drop-shadow-[0_25px_30px_rgba(0,0,0,0.4)] object-cover w-[50%] h-[50%]"
             />
             <div className="mt-4">
               <h1 className="text-center text-3xl font-semibold text-white mb-2">
