@@ -82,7 +82,9 @@ function evaluateSD(userSD, ci95, ci99) {
 // Interpret Cohen’s d
 function interpretD(d) {
   if (typeof d !== "number" || isNaN(d)) return "Not available";
-  const entry = dRanges.find((r) => d >= r.min && d <= r.max);
+  const entry = dRanges.find(
+    (r) => Math.abs(d) >= r.min && Math.abs(d) <= r.max
+  );
   return entry ? entry.message : "Not available";
 }
 
